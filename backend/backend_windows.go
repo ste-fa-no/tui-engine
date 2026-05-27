@@ -3,17 +3,15 @@
 package backend
 
 import (
-	"os"
-
 	"golang.org/x/sys/windows"
-	"golang.org/x/term"
 )
 
 type BackendWindows struct {
-	oldState      *term.State
 	oldStdoutMode uint32
+	backendInit
 	backendSize
 	backendBuffer
+	backendRestore
 }
 
 func NewBackend() Backend {
@@ -36,42 +34,13 @@ func (b *BackendWindows) Init() error {
 		return err
 	}
 
-	state, err := term.MakeRaw(int(STDIN))
+	err = b.backendInit.Init()
 
-	if err != nil {
-		return err
-	}
-
-	b.oldState = state
-	_, err = os.Stdout.WriteString(ALTERNATE_SCREEN)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = os.Stdout.WriteString(HIDE_CURSOR)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (b *BackendWindows) Restore() error {
-	_, err := os.Stdout.WriteString(RESTORE_SCREEN)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = os.Stdout.WriteString(SHOW_CURSOR)
-
-	if err != nil {
-		return err
-	}
-
-	err = term.Restore(int(STDIN), b.oldState)
+	err := b.backendRestore.Restore()
 
 	if err != nil {
 		return err

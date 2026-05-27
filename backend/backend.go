@@ -13,14 +13,14 @@ var (
 )
 
 const (
-	ALTERNATE_SCREEN = "\x1b[?1049h"
-	RESTORE_SCREEN   = "\x1b[?1049l"
+	AlternateScreen = "\x1b[?1049h"
+	RestoreScreen   = "\x1b[?1049l"
 
-	HIDE_CURSOR = "\x1b[?25l"
-	SHOW_CURSOR = "\x1b[?25h"
+	HideCursor = "\x1b[?25l"
+	ShowCursor = "\x1b[?25h"
 
-	CLEAR_SCREEN  = "\x1b[2J"
-	CURSOR_ON_TOP = "\x1b[H"
+	ClearScreen = "\x1b[2J"
+	CursorOnTop = "\x1b[H"
 )
 
 type Backend interface {
@@ -49,5 +49,51 @@ func (b *backendBuffer) Write(data []byte) error {
 
 func (b *backendBuffer) Flush() error {
 	_, err := b.buffer.WriteTo(os.Stdout)
+	return err
+}
+
+type backendRestore struct {
+	oldState *term.State
+}
+
+func (b *backendRestore) Restore() error {
+	_, err := os.Stdout.WriteString(RestoreScreen)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = os.Stdout.WriteString(ShowCursor)
+
+	if err != nil {
+		return err
+	}
+
+	err = term.Restore(int(STDIN), b.oldState)
+
+	return err
+}
+
+type backendInit struct {
+	oldState *term.State
+}
+
+func (b backendInit) Init() error {
+	state, err := term.MakeRaw(int(STDIN))
+
+	if err != nil {
+		return err
+	}
+
+	b.oldState = state
+
+	_, err = os.Stdout.WriteString(AlternateScreen)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = os.Stdout.WriteString(HideCursor)
+
 	return err
 }
