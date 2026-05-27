@@ -6,16 +6,34 @@ type Style struct {
 	Underline bool
 }
 
+type Styles int
+
+const (
+	Reset Styles = iota
+	Bold
+	Italic
+	Underline
+)
+
+var styleSequenceMap = map[Styles]string{
+	Reset:     "\x1b[0m",
+	Bold:      "\x1b[1m",
+	Italic:    "\x1b[3m",
+	Underline: "\x1b[4m",
+}
+
 func (s Style) Sequence() string {
-	seq := "\x1b[0m" // reset sempre
+	seq := styleSequenceMap[Reset]
+
 	if s.Bold {
-		seq += "\x1b[1m"
+		seq += styleSequenceMap[Bold]
 	}
 	if s.Italic {
-		seq += "\x1b[3m"
+		seq += styleSequenceMap[Italic]
 	}
 	if s.Underline {
-		seq += "\x1b[4m"
+		seq += styleSequenceMap[Underline]
 	}
+
 	return seq
 }
