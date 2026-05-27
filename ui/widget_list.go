@@ -97,7 +97,7 @@ func (t *List) Render(ctx Context, width, height int) {
 				scrollCh = '█'
 			}
 			ctx.Draw(width-1, i, renderer.Cell{
-				Ch:         rune(scrollCh),
+				Ch:         scrollCh,
 				Foreground: renderer.Color{R: 180, G: 180, B: 180},
 				Background: t.Background,
 			})
