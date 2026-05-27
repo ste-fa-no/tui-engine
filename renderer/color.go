@@ -7,11 +7,14 @@ type Color struct {
 }
 
 var (
-	ColorBlack = Color{0, 0, 0}
-	ColorWhite = Color{255, 255, 255}
-	ColorRed   = Color{255, 0, 0}
-	ColorGreen = Color{0, 255, 0}
-	ColorBlue  = Color{0, 0, 255}
+	ColorRed     = Color{255, 0, 0}
+	ColorGreen   = Color{0, 255, 0}
+	ColorBlue    = Color{0, 0, 255}
+	ColorCyan    = Color{0, 255, 255}
+	ColorMagenta = Color{255, 0, 255}
+	ColorYellow  = Color{255, 255, 0}
+	ColorBlack   = Color{0, 0, 0}
+	ColorWhite   = Color{255, 255, 255}
 )
 
 func (c Color) SequenceForeground() string {
