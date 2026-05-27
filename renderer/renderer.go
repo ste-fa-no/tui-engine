@@ -55,12 +55,12 @@ func (r *Renderer) Resize(width, height int) {
 	r.previousBuffer = NewRenderBuffer(width, height)
 	r.currentBuffer = NewRenderBuffer(width, height)
 
-	err := r.backend.Write([]byte(backend.CLEAR_SCREEN))
+	err := r.backend.Write([]byte(backend.ClearScreen))
 	if err != nil {
 		return
 	}
-	
-	err = r.backend.Write([]byte(backend.CURSOR_ON_TOP))
+
+	err = r.backend.Write([]byte(backend.CursorOnTop))
 	if err != nil {
 		return
 	}
