@@ -51,6 +51,10 @@ func (t *List) Render(ctx Context, width, height int) {
 			thumbHeight = 1
 		}
 		thumbPos = t.offset * height / len(t.Items)
+
+		if t.offset+height >= len(t.Items) {
+			thumbPos = height - thumbHeight
+		}
 	}
 
 	for i := 0; i < height; i++ {
