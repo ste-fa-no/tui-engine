@@ -7,6 +7,11 @@ type Text struct {
 	Foreground renderer.Color
 	Background renderer.Color
 	Style      renderer.Style
+	Constraint Constraint
+}
+
+func (t Text) GetConstraint() Constraint {
+	return t.Constraint
 }
 
 func (t Text) Render(ctx Context, width, height int) {

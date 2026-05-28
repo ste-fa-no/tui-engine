@@ -9,10 +9,10 @@ func NewVStack(children ...Widget) VStack {
 }
 
 func (h VStack) Render(ctx Context, width, height int) {
-	nc := len(h.Children)
-	size := height / nc
-
+	sizes := resolveConstraints(h.Children, height)
+	start := 0
 	for i, child := range h.Children {
-		child.Render(ctx.SubContext(0, size*i), width, size)
+		child.Render(ctx.SubContext(0, start), width, sizes[i])
+		start += sizes[i]
 	}
 }

@@ -7,10 +7,19 @@ import (
 
 type TextField struct {
 	Input
+	Constraint Constraint
+}
+
+func (tf *TextField) IsFocused() bool {
+	return tf.focused
 }
 
 func (tf *TextField) SetFocused(focused bool) {
 	tf.focused = focused
+}
+
+func (tf *TextField) GetConstraint() Constraint {
+	return tf.Constraint
 }
 
 func (tf *TextField) HandleEvent(e events.Event) bool {

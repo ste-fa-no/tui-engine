@@ -3,10 +3,16 @@ package ui
 import "tui-engine/renderer"
 
 type TitledBorder struct {
-	Child      Widget
-	Foreground renderer.Color
-	Background renderer.Color
-	Title      string
+	Child             Widget
+	Foreground        renderer.Color
+	ForegroundFocused renderer.Color
+	Background        renderer.Color
+	Title             string
+	Constraint        Constraint
+}
+
+func (b TitledBorder) GetConstraint() Constraint {
+	return b.Constraint
 }
 
 func (b TitledBorder) Render(ctx Context, width, height int) {
@@ -37,12 +43,19 @@ func (b TitledBorder) Render(ctx Context, width, height int) {
 				continue
 			}
 
+			fg := b.Foreground
+			if interactive, ok := b.Child.(Interactive); ok {
+				if interactive.IsFocused() {
+					fg = b.ForegroundFocused
+				}
+			}
+
 			ctx.Draw(
 				i,
 				j,
 				renderer.Cell{
 					Ch:         ch,
-					Foreground: b.Foreground,
+					Foreground: fg,
 					Background: b.Background},
 			)
 		}

@@ -6,7 +6,11 @@ type Border struct {
 	Child      Widget
 	Foreground renderer.Color
 	Background renderer.Color
-	Title      string
+	Constraint Constraint
+}
+
+func (b Border) GetConstraint() Constraint {
+	return b.Constraint
 }
 
 func (b Border) Render(ctx Context, width, height int) {
@@ -30,8 +34,7 @@ func (b Border) Render(ctx Context, width, height int) {
 			}
 
 			ctx.Draw(
-				i,
-				j,
+				i, j,
 				renderer.Cell{
 					Ch:         ch,
 					Foreground: b.Foreground,

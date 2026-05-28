@@ -7,14 +7,23 @@ import (
 
 type TextArea struct {
 	Input
-	lines     []string
-	cursorRow int
-	cursorCol int
-	offsetRow int
+	lines      []string
+	cursorRow  int
+	cursorCol  int
+	offsetRow  int
+	Constraint Constraint
+}
+
+func (ta *TextArea) IsFocused() bool {
+	return ta.focused
 }
 
 func (ta *TextArea) SetFocused(focused bool) {
 	ta.focused = focused
+}
+
+func (ta *TextArea) GetConstraint() Constraint {
+	return ta.Constraint
 }
 
 func (ta *TextArea) HandleEvent(e events.Event) bool {
@@ -98,18 +107,11 @@ func (ta *TextArea) HandleEvent(e events.Event) bool {
 	return false
 }
 
-type visualLine struct {
-	text     string
-	logRow   int
-	colStart int
-}
-
 func (ta *TextArea) Render(ctx Context, width, height int) {
 	if len(ta.lines) == 0 {
 		ta.lines = []string{""}
 	}
 
-	// disegna placeholder se vuoto e non focalizzato
 	if !ta.focused && len(ta.lines) == 1 && ta.lines[0] == "" {
 		placeholderRunes := []rune(ta.Placeholder)
 		for i := 0; i < width && i < len(placeholderRunes); i++ {
@@ -199,6 +201,12 @@ func (ta *TextArea) Render(ctx Context, width, height int) {
 			})
 		}
 	}
+}
+
+type visualLine struct {
+	text     string
+	logRow   int
+	colStart int
 }
 
 func wrapLine(line string, width int) []string {

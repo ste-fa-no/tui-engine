@@ -16,6 +16,7 @@ type Widget interface {
 
 type Interactive interface {
 	Widget
+	IsFocused() bool
 	SetFocused(focused bool)
 	HandleEvent(event events.Event) bool
 }

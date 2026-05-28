@@ -6,37 +6,44 @@ import (
 )
 
 type List struct {
-	Items    []string
-	selected int
-	focused  bool
-	offset   int
-
-	Foreground renderer.Color
-	Background renderer.Color
-
+	Items              []string
+	selected           int
+	focused            bool
+	offset             int
+	Foreground         renderer.Color
+	Background         renderer.Color
 	SelectedForeground renderer.Color
 	SelectedBackground renderer.Color
+	Constraint         Constraint
 }
 
-func (t *List) SetFocused(focused bool) {
-	t.focused = focused
+func (l *List) IsFocused() bool {
+	return l.focused
 }
 
-func (t *List) Render(ctx Context, width, height int) {
-	if t.selected < t.offset {
-		t.offset = t.selected
+func (l *List) SetFocused(focused bool) {
+	l.focused = focused
+}
+
+func (l *List) GetConstraint() Constraint {
+	return l.Constraint
+}
+
+func (l *List) Render(ctx Context, width, height int) {
+	if l.selected < l.offset {
+		l.offset = l.selected
 	}
-	if t.selected >= t.offset+height {
-		t.offset = t.selected - height + 1
+	if l.selected >= l.offset+height {
+		l.offset = l.selected - height + 1
 	}
-	if t.offset > 0 && t.offset+height > len(t.Items) {
-		t.offset = len(t.Items) - height
-		if t.offset < 0 {
-			t.offset = 0
+	if l.offset > 0 && l.offset+height > len(l.Items) {
+		l.offset = len(l.Items) - height
+		if l.offset < 0 {
+			l.offset = 0
 		}
 	}
 
-	showScrollbar := len(t.Items) > height
+	showScrollbar := len(l.Items) > height
 
 	itemWidth := width
 	if showScrollbar {
@@ -46,29 +53,29 @@ func (t *List) Render(ctx Context, width, height int) {
 	thumbHeight := 1
 	thumbPos := 0
 	if showScrollbar {
-		thumbHeight = height * height / len(t.Items)
+		thumbHeight = height * height / len(l.Items)
 		if thumbHeight < 1 {
 			thumbHeight = 1
 		}
-		thumbPos = t.offset * height / len(t.Items)
+		thumbPos = l.offset * height / len(l.Items)
 
-		if t.offset+height >= len(t.Items) {
+		if l.offset+height >= len(l.Items) {
 			thumbPos = height - thumbHeight
 		}
 	}
 
 	for i := 0; i < height; i++ {
-		itemIdx := t.offset + i
+		itemIdx := l.offset + i
 
-		if itemIdx < len(t.Items) {
-			s := t.Items[itemIdx]
-			fg := t.Foreground
-			bg := t.Background
+		if itemIdx < len(l.Items) {
+			s := l.Items[itemIdx]
+			fg := l.Foreground
+			bg := l.Background
 			prefix := ' '
 
-			if itemIdx == t.selected {
-				fg = t.SelectedForeground
-				bg = t.SelectedBackground
+			if itemIdx == l.selected {
+				fg = l.SelectedForeground
+				bg = l.SelectedBackground
 				prefix = '>'
 			}
 
@@ -87,7 +94,7 @@ func (t *List) Render(ctx Context, width, height int) {
 			}
 		} else {
 			for j := 0; j < itemWidth; j++ {
-				ctx.Draw(j, i, renderer.Cell{Ch: ' ', Foreground: t.Foreground, Background: t.Background})
+				ctx.Draw(j, i, renderer.Cell{Ch: ' ', Foreground: l.Foreground, Background: l.Background})
 			}
 		}
 
@@ -99,22 +106,22 @@ func (t *List) Render(ctx Context, width, height int) {
 			ctx.Draw(width-1, i, renderer.Cell{
 				Ch:         scrollCh,
 				Foreground: renderer.Color{R: 180, G: 180, B: 180},
-				Background: t.Background,
+				Background: l.Background,
 			})
 		}
 	}
 }
 
-func (t *List) HandleEvent(e events.Event) bool {
+func (l *List) HandleEvent(e events.Event) bool {
 	switch ev := e.(type) {
 	case events.KeyEvent:
 		if ev.Code == events.KeyUp {
-			if t.selected > 0 {
-				t.selected--
+			if l.selected > 0 {
+				l.selected--
 			}
 		} else if ev.Code == events.KeyDown {
-			if t.selected < len(t.Items)-1 {
-				t.selected++
+			if l.selected < len(l.Items)-1 {
+				l.selected++
 			}
 		}
 		return true
