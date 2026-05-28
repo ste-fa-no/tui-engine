@@ -3,10 +3,7 @@
 package backend
 
 type BackendUnix struct {
-	backendInit
-	backendSize
-	backendRestore
-	backendBuffer
+	baseBackend
 }
 
 func NewBackend() Backend {

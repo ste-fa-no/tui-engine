@@ -8,10 +8,7 @@ import (
 
 type BackendWindows struct {
 	oldStdoutMode uint32
-	backendInit
-	backendSize
-	backendBuffer
-	backendRestore
+	baseBackend
 }
 
 func NewBackend() Backend {
@@ -34,13 +31,13 @@ func (b *BackendWindows) Init() error {
 		return err
 	}
 
-	err = b.backendInit.Init()
+	err = b.baseBackend.Init()
 
 	return err
 }
 
 func (b *BackendWindows) Restore() error {
-	err := b.backendRestore.Restore()
+	err := b.baseBackend.Restore()
 
 	if err != nil {
 		return err
