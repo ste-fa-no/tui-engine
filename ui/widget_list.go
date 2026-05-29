@@ -3,11 +3,12 @@ package ui
 import (
 	"tui-engine/events"
 	"tui-engine/renderer"
+	"tui-engine/util"
 )
 
 type List struct {
 	Items              []string
-	selected           int
+	cursor             int
 	focused            bool
 	offset             int
 	Foreground         renderer.Color
@@ -15,6 +16,7 @@ type List struct {
 	SelectedForeground renderer.Color
 	SelectedBackground renderer.Color
 	Constraint         Constraint
+	Selection          util.State[int]
 }
 
 func (l *List) IsFocused() bool {
@@ -30,11 +32,11 @@ func (l *List) GetConstraint() Constraint {
 }
 
 func (l *List) Render(ctx Context, width, height int) {
-	if l.selected < l.offset {
-		l.offset = l.selected
+	if l.cursor < l.offset {
+		l.offset = l.cursor
 	}
-	if l.selected >= l.offset+height {
-		l.offset = l.selected - height + 1
+	if l.cursor >= l.offset+height {
+		l.offset = l.cursor - height + 1
 	}
 	if l.offset > 0 && l.offset+height > len(l.Items) {
 		l.offset = len(l.Items) - height
@@ -73,7 +75,7 @@ func (l *List) Render(ctx Context, width, height int) {
 			bg := l.Background
 			prefix := ' '
 
-			if itemIdx == l.selected {
+			if itemIdx == l.cursor {
 				fg = l.SelectedForeground
 				bg = l.SelectedBackground
 				prefix = '>'
@@ -115,14 +117,17 @@ func (l *List) Render(ctx Context, width, height int) {
 func (l *List) HandleEvent(e events.Event) bool {
 	switch ev := e.(type) {
 	case events.KeyEvent:
-		if ev.Code == events.KeyUp {
-			if l.selected > 0 {
-				l.selected--
+		switch ev.Code {
+		case events.KeyUp:
+			if l.cursor > 0 {
+				l.cursor--
 			}
-		} else if ev.Code == events.KeyDown {
-			if l.selected < len(l.Items)-1 {
-				l.selected++
+		case events.KeyDown:
+			if l.cursor < len(l.Items)-1 {
+				l.cursor++
 			}
+		case events.KeyEnter:
+			l.Selection.Set(l.cursor)
 		}
 		return true
 	}
