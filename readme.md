@@ -24,13 +24,12 @@ A small toy graphics engine for text-based user interface applications.
 - [x] TextField with horizontal scrolling and placeholder
 - [x] Multiline TextArea with word wrap and placeholder
 - [x] Visual scrollbar for List
-- [X] Layout constraints
-- [ ] Inter-widget communication
+- [x] Layout constraints
+- [x] Structured application state management
 - [ ] Buttons
 - [ ] Checkboxes and radio buttons
 - [ ] Progress bars
 - [ ] Modals
-- [ ] Structured application state management
 - [ ] Decorations for core widgets
 - [ ] Mouse support
 
