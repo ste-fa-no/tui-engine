@@ -28,21 +28,28 @@ func (t Text) Render(ctx Context, width, height int) {
 		}
 
 		if ch == '\n' {
+			for col < width {
+				ctx.Draw(col, row, renderer.Cell{Ch: ' ', Foreground: t.Foreground, Background: t.Background})
+				col++
+			}
 			col = 0
 			row++
 			continue
 		}
 
-		ctx.Draw(
-			col,
-			row,
-			renderer.Cell{
-				Ch:         ch,
-				Style:      t.Style,
-				Foreground: t.Foreground,
-				Background: t.Background},
-		)
-
+		ctx.Draw(col, row, renderer.Cell{
+			Ch:         ch,
+			Style:      t.Style,
+			Foreground: t.Foreground,
+			Background: t.Background,
+		})
 		col++
+	}
+
+	for r := row; r < height; r++ {
+		for c := col; c < width; c++ {
+			ctx.Draw(c, r, renderer.Cell{Ch: ' ', Foreground: t.Foreground, Background: t.Background})
+		}
+		col = 0
 	}
 }
