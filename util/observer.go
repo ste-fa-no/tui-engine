@@ -1,28 +1,34 @@
 package util
 
 type Observable[T any] interface {
-	Subscribe(Observer[T])
-	Unsubscribe(Observer[T])
+	AddObserver(Observer[T])
+	RemoveObserver(Observer[T])
 	Notify(T)
 }
 
-type ObservableState[T any] struct {
+type observableState[T any] struct {
 	observers Set[Observer[T]]
 }
 
-func NewObservableState[T any]() *ObservableState[T] {
-	return &ObservableState[T]{observers: NewHashSet[Observer[T]]()}
-}
-
-func (s *ObservableState[T]) Subscribe(o Observer[T]) {
+func (s *observableState[T]) AddObserver(o Observer[T]) {
+	if s.observers == nil {
+		s.observers = NewHashSet[Observer[T]]()
+	}
 	s.observers.Add(o)
 }
 
-func (s *ObservableState[T]) Unsubscribe(o Observer[T]) {
+func (s *observableState[T]) RemoveObserver(o Observer[T]) {
+	if s.observers == nil {
+		s.observers = NewHashSet[Observer[T]]()
+		return
+	}
 	s.observers.Remove(o)
 }
 
-func (s *ObservableState[T]) Notify(data T) {
+func (s *observableState[T]) Notify(data T) {
+	if s.observers == nil {
+		return
+	}
 	s.observers.Apply(func(o Observer[T]) {
 		o.Update(data)
 	})
