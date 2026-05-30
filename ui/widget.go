@@ -5,11 +5,6 @@ import (
 	"tui-engine/renderer"
 )
 
-type Context interface {
-	Draw(x, y int, cell renderer.Cell)
-	SubContext(offsetX, offsetY int) Context
-}
-
 type Widget interface {
 	Render(ctx Context, width, height int)
 }
