@@ -40,6 +40,11 @@ func main() {
 				"Elemento 8",
 				"Elemento 9",
 				"Elemento 10",
+				"Elemento 11",
+				"Elemento 12",
+				"Elemento 13",
+				"Elemento 14",
+				"Elemento 15",
 			},
 			Foreground:         renderer.ColorWhite,
 			Background:         renderer.ColorBlack,
@@ -49,15 +54,42 @@ func main() {
 		Scrollbar: ui.DefaultScrollbar,
 	}
 
-	fm := ui.NewFocusManager()
-	fm.Add(list)
+	textarea := &ui.ScrollableTextArea{
+		TextArea: ui.TextArea{
+			Input: ui.Input{
+				Foreground:            renderer.ColorWhite,
+				Background:            renderer.ColorBlack,
+				CursorForeground:      renderer.ColorBlack,
+				CursorBackground:      renderer.ColorWhite,
+				PlaceholderForeground: renderer.Color{R: 100, G: 100, B: 100},
+				Placeholder:           "Scrivi qualcosa...",
+			},
+		},
+		Scrollbar: ui.DefaultScrollbar,
+	}
 
-	layout := ui.TitledBorder{
-		Title:             "Lista con scrollbar",
+	listBorder := ui.TitledBorder{
+		Title:             "ScrollableList",
 		Child:             list,
 		Foreground:        renderer.ColorWhite,
 		ForegroundFocused: renderer.ColorGreen,
 	}
+
+	textareaBorder := ui.TitledBorder{
+		Title:             "ScrollableTextArea",
+		Child:             textarea,
+		Foreground:        renderer.ColorWhite,
+		ForegroundFocused: renderer.ColorGreen,
+	}
+
+	layout := ui.NewHStack(
+		&listBorder,
+		&textareaBorder,
+	)
+
+	fm := ui.NewFocusManager()
+	fm.Add(list)
+	fm.Add(textarea)
 
 	w, h, _ := b.Size()
 
@@ -72,8 +104,9 @@ func main() {
 		case events.KeyEvent:
 			if ev.Code == events.KeyCtrlC {
 				return
+			} else {
+				fm.HandleEvent(e)
 			}
-			fm.HandleEvent(e)
 		case events.ResizeEvent:
 			w, h = ev.Width, ev.Height
 			u.Resize(w, h)

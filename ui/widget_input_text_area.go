@@ -124,50 +124,13 @@ func (ta *TextArea) Render(ctx Context, width, height int) {
 		return
 	}
 
-	var visualLines []visualLine
-	cursorVisualRow := 0
-	cursorVisualCol := 0
-
-	for logRow, line := range ta.lines {
-		chunks := wrapLine(line, width)
-		for chunkIdx, chunk := range chunks {
-			colStart := chunkIdx * width
-			vl := visualLine{
-				text:     chunk,
-				logRow:   logRow,
-				colStart: colStart,
-			}
-			visualLines = append(visualLines, vl)
-
-			if logRow == ta.cursorRow {
-				if ta.cursorCol >= colStart && ta.cursorCol < colStart+width {
-					cursorVisualRow = len(visualLines) - 1
-					cursorVisualCol = ta.cursorCol - colStart
-				} else if chunkIdx == len(chunks)-1 && ta.cursorCol >= colStart+len([]rune(chunk)) {
-					cursorVisualRow = len(visualLines) - 1
-					cursorVisualCol = len([]rune(chunk))
-				}
-			}
-		}
-	}
-
-	if cursorVisualRow < ta.offsetRow {
-		ta.offsetRow = cursorVisualRow
-	}
-	if cursorVisualRow >= ta.offsetRow+height {
-		ta.offsetRow = cursorVisualRow - height + 1
-	}
-	if ta.offsetRow > 0 && ta.offsetRow+height > len(visualLines) {
-		ta.offsetRow = len(visualLines) - height
-		if ta.offsetRow < 0 {
-			ta.offsetRow = 0
-		}
-	}
+	layout := ta.computeLayout(width)
+	ta.clampOffset(layout, height)
 
 	for row := 0; row < height; row++ {
 		visIdx := ta.offsetRow + row
 
-		if visIdx >= len(visualLines) {
+		if visIdx >= len(layout.visualLines) {
 			for col := 0; col < width; col++ {
 				ctx.Draw(col, row, renderer.Cell{
 					Ch:         ' ',
@@ -178,7 +141,7 @@ func (ta *TextArea) Render(ctx Context, width, height int) {
 			continue
 		}
 
-		runes := []rune(visualLines[visIdx].text)
+		runes := []rune(layout.visualLines[visIdx].text)
 
 		for col := 0; col < width; col++ {
 			fg := ta.Foreground
@@ -189,7 +152,7 @@ func (ta *TextArea) Render(ctx Context, width, height int) {
 				ch = runes[col]
 			}
 
-			if ta.focused && visIdx == cursorVisualRow && col == cursorVisualCol {
+			if ta.focused && visIdx == layout.cursorVisualRow && col == layout.cursorVisualCol {
 				fg = ta.CursorForeground
 				bg = ta.CursorBackground
 			}
@@ -207,6 +170,46 @@ type visualLine struct {
 	text     string
 	logRow   int
 	colStart int
+}
+
+type textAreaLayout struct {
+	visualLines     []visualLine
+	cursorVisualRow int
+	cursorVisualCol int
+}
+
+func (ta *TextArea) computeLayout(width int) textAreaLayout {
+	var visualLines []visualLine
+	cursorVisualRow := 0
+	cursorVisualCol := 0
+
+	for logRow, line := range ta.lines {
+		chunks := wrapLine(line, width)
+		for chunkIdx, chunk := range chunks {
+			colStart := chunkIdx * width
+			visualLines = append(visualLines, visualLine{
+				text:     chunk,
+				logRow:   logRow,
+				colStart: colStart,
+			})
+
+			if logRow == ta.cursorRow {
+				if ta.cursorCol >= colStart && ta.cursorCol < colStart+width {
+					cursorVisualRow = len(visualLines) - 1
+					cursorVisualCol = ta.cursorCol - colStart
+				} else if chunkIdx == len(chunks)-1 && ta.cursorCol >= colStart+len([]rune(chunk)) {
+					cursorVisualRow = len(visualLines) - 1
+					cursorVisualCol = len([]rune(chunk))
+				}
+			}
+		}
+	}
+
+	return textAreaLayout{
+		visualLines:     visualLines,
+		cursorVisualRow: cursorVisualRow,
+		cursorVisualCol: cursorVisualCol,
+	}
 }
 
 func wrapLine(line string, width int) []string {
@@ -227,4 +230,19 @@ func wrapLine(line string, width int) []string {
 	}
 
 	return result
+}
+
+func (ta *TextArea) clampOffset(layout textAreaLayout, height int) {
+	if layout.cursorVisualRow < ta.offsetRow {
+		ta.offsetRow = layout.cursorVisualRow
+	}
+	if layout.cursorVisualRow >= ta.offsetRow+height {
+		ta.offsetRow = layout.cursorVisualRow - height + 1
+	}
+	if ta.offsetRow > 0 && ta.offsetRow+height > len(layout.visualLines) {
+		ta.offsetRow = len(layout.visualLines) - height
+		if ta.offsetRow < 0 {
+			ta.offsetRow = 0
+		}
+	}
 }
