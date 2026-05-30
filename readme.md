@@ -13,25 +13,30 @@ A small toy graphics engine for text-based user interface applications.
 - [x] Raw mode + alternate screen
 - [x] Event loop with goroutines and channels
 - [x] ANSI escape sequence parser
-- [x] Resize events
+- [x] Support for terminal resize
 - [x] Differential rendering
 - [x] True Color
 - [x] Text formatting
 - [x] Composable and declarative widgets
-- [x] Context with relative coordinates
 - [x] Focus system
-- [x] List widget with scrolling
-- [x] TextField with horizontal scrolling and placeholder
-- [x] Multiline TextArea with word wrap and placeholder
-- [x] Visual scrollbar for List
 - [x] Layout constraints
 - [x] Structured application state management
+- [ ] Decorations for core widgets
+- [ ] Mouse support
+
+### Available widgets
+- [x] Horizontal stacks
+- [x] Vertical stacks
+- [x] Text blocks
+- [x] Lists
+- [x] Text fields (single line with horizontal scrolling)
+- [x] Text areas (multiple lines with word-wrap and vertical scrolling)
+- [x] Scrollbar decorator for vertical-scrolling widgets
+- [x] Border decorator for all widgets (with support for titles)
 - [ ] Buttons
 - [ ] Checkboxes and radio buttons
 - [ ] Progress bars
 - [ ] Modals
-- [ ] Decorations for core widgets
-- [ ] Mouse support
 
 Philosophy
 
