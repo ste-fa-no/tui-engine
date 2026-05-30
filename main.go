@@ -27,57 +27,37 @@ func main() {
 		panic(err)
 	}
 
-	list := &ui.List{
-		Items:              []string{"Elemento 1", "Elemento 2", "Elemento 3", "Elemento 4", "Elemento 5"},
-		Foreground:         renderer.ColorWhite,
-		Background:         renderer.ColorBlack,
-		SelectedForeground: renderer.ColorBlack,
-		SelectedBackground: renderer.ColorGreen,
-	}
-
-	textArea := &ui.TextArea{
-		Input: ui.Input{
-			Placeholder:           "Scrivi qui...",
-			Foreground:            renderer.ColorWhite,
-			Background:            renderer.ColorBlack,
-			CursorForeground:      renderer.ColorBlack,
-			CursorBackground:      renderer.ColorWhite,
-			PlaceholderForeground: renderer.Color{R: 128, G: 128, B: 128},
+	list := &ui.ScrollableList{
+		List: ui.List{
+			Items: []string{
+				"Elemento 1",
+				"Elemento 2",
+				"Elemento 3",
+				"Elemento 4",
+				"Elemento 5",
+				"Elemento 6",
+				"Elemento 7",
+				"Elemento 8",
+				"Elemento 9",
+				"Elemento 10",
+			},
+			Foreground:         renderer.ColorWhite,
+			Background:         renderer.ColorBlack,
+			SelectedForeground: renderer.ColorBlack,
+			SelectedBackground: renderer.ColorGreen,
 		},
-	}
-
-	panel := ui.Text{
-		Content:    "Pannello al 30%",
-		Foreground: renderer.ColorYellow,
-		Background: renderer.ColorBlack,
+		Scrollbar: ui.DefaultScrollbar,
 	}
 
 	fm := ui.NewFocusManager()
 	fm.Add(list)
-	fm.Add(textArea)
 
-	layout := ui.NewHStack(
-		ui.TitledBorder{
-			Title:             "Lista (Fixed 30)",
-			Child:             list,
-			Foreground:        renderer.ColorWhite,
-			ForegroundFocused: renderer.ColorGreen,
-			Constraint:        ui.Fixed{Size: 30},
-		},
-		ui.TitledBorder{
-			Title:             "Note (Fill)",
-			Child:             textArea,
-			Foreground:        renderer.ColorWhite,
-			ForegroundFocused: renderer.ColorGreen,
-			Constraint:        ui.Fill{},
-		},
-		ui.TitledBorder{
-			Title:      "Panel (30%)",
-			Child:      panel,
-			Foreground: renderer.ColorWhite,
-			Constraint: ui.Percent{Value: 30},
-		},
-	)
+	layout := ui.TitledBorder{
+		Title:             "Lista con scrollbar",
+		Child:             list,
+		Foreground:        renderer.ColorWhite,
+		ForegroundFocused: renderer.ColorGreen,
+	}
 
 	w, h, _ := b.Size()
 
