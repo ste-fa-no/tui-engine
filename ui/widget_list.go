@@ -32,84 +32,44 @@ func (l *List) GetConstraint() Constraint {
 }
 
 func (l *List) Render(ctx Context, width, height int) {
-	if l.cursor < l.offset {
-		l.offset = l.cursor
-	}
-	if l.cursor >= l.offset+height {
-		l.offset = l.cursor - height + 1
-	}
-	if l.offset > 0 && l.offset+height > len(l.Items) {
-		l.offset = len(l.Items) - height
-		if l.offset < 0 {
-			l.offset = 0
-		}
-	}
+	l.clampOffset(height)
 
-	showScrollbar := len(l.Items) > height
-
-	itemWidth := width
-	if showScrollbar {
-		itemWidth = width - 1
-	}
-
-	thumbHeight := 1
-	thumbPos := 0
-	if showScrollbar {
-		thumbHeight = height * height / len(l.Items)
-		if thumbHeight < 1 {
-			thumbHeight = 1
-		}
-		thumbPos = l.offset * height / len(l.Items)
-
-		if l.offset+height >= len(l.Items) {
-			thumbPos = height - thumbHeight
-		}
-	}
-
-	for i := 0; i < height; i++ {
+	for i := 0; i < height && l.offset+i < len(l.Items); i++ {
 		itemIdx := l.offset + i
+		s := l.Items[itemIdx]
 
-		if itemIdx < len(l.Items) {
-			s := l.Items[itemIdx]
-			fg := l.Foreground
-			bg := l.Background
-			prefix := ' '
+		fg := l.Foreground
+		bg := l.Background
+		prefix := ' '
 
-			if itemIdx == l.cursor {
-				fg = l.SelectedForeground
-				bg = l.SelectedBackground
-				prefix = '>'
-			}
-
-			ctx.Draw(0, i, renderer.Cell{Ch: prefix, Foreground: fg, Background: bg})
-
-			for j, ch := range s {
-				if j+2 >= itemWidth {
-					break
-				}
-				ctx.Draw(j+2, i, renderer.Cell{Ch: ch, Foreground: fg, Background: bg})
-			}
-
-			lineLen := len([]rune(s)) + 2
-			for j := lineLen; j < itemWidth; j++ {
-				ctx.Draw(j, i, renderer.Cell{Ch: ' ', Foreground: fg, Background: bg})
-			}
-		} else {
-			for j := 0; j < itemWidth; j++ {
-				ctx.Draw(j, i, renderer.Cell{Ch: ' ', Foreground: l.Foreground, Background: l.Background})
-			}
+		if itemIdx == l.cursor {
+			fg = l.SelectedForeground
+			bg = l.SelectedBackground
+			prefix = '>'
 		}
 
-		if showScrollbar {
-			scrollCh := '│'
-			if i >= thumbPos && i < thumbPos+thumbHeight {
-				scrollCh = '█'
+		ctx.Draw(0, i, renderer.Cell{Ch: prefix, Foreground: fg, Background: bg})
+
+		for j, ch := range s {
+			if j+2 >= width {
+				break
 			}
-			ctx.Draw(width-1, i, renderer.Cell{
-				Ch:         scrollCh,
-				Foreground: renderer.Color{R: 180, G: 180, B: 180},
-				Background: l.Background,
-			})
+			ctx.Draw(j+2, i, renderer.Cell{Ch: ch, Foreground: fg, Background: bg})
+		}
+
+		lineLen := len([]rune(s)) + 2
+		for j := lineLen; j < width; j++ {
+			ctx.Draw(j, i, renderer.Cell{Ch: ' ', Foreground: fg, Background: bg})
+		}
+	}
+
+	visibleItems := len(l.Items) - l.offset
+	if visibleItems > height {
+		visibleItems = height
+	}
+	for i := visibleItems; i < height; i++ {
+		for j := 0; j < width; j++ {
+			ctx.Draw(j, i, renderer.Cell{Ch: ' ', Foreground: l.Foreground, Background: l.Background})
 		}
 	}
 }
@@ -133,4 +93,23 @@ func (l *List) HandleEvent(e events.Event) bool {
 	}
 
 	return false
+}
+
+func (l *List) Offset() int {
+	return l.offset
+}
+
+func (l *List) clampOffset(height int) {
+	if l.cursor < l.offset {
+		l.offset = l.cursor
+	}
+	if l.cursor >= l.offset+height {
+		l.offset = l.cursor - height + 1
+	}
+	if l.offset > 0 && l.offset+height > len(l.Items) {
+		l.offset = len(l.Items) - height
+		if l.offset < 0 {
+			l.offset = 0
+		}
+	}
 }
