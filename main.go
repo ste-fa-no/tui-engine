@@ -1,32 +1,12 @@
 package main
 
 import (
-	"tui-engine/backend"
-	"tui-engine/events"
+	"tui-engine/app"
 	"tui-engine/renderer"
 	"tui-engine/ui"
 )
 
 func main() {
-	b := backend.NewBackend()
-
-	err := b.Init()
-	if err != nil {
-		panic(err)
-	}
-
-	defer func() {
-		err := b.Restore()
-		if err != nil {
-			panic(err)
-		}
-	}()
-
-	u, err := ui.New(b)
-	if err != nil {
-		panic(err)
-	}
-
 	list := &ui.ScrollableList{
 		List: ui.List{
 			Items: []string{
@@ -68,51 +48,28 @@ func main() {
 		Scrollbar: ui.DefaultScrollbar,
 	}
 
-	listBorder := ui.TitledBorder{
+	listBorder := &ui.TitledBorder{
 		Title:             "ScrollableList",
 		Child:             list,
 		Foreground:        renderer.ColorWhite,
 		ForegroundFocused: renderer.ColorGreen,
 	}
 
-	textareaBorder := ui.TitledBorder{
+	textareaBorder := &ui.TitledBorder{
 		Title:             "ScrollableTextArea",
 		Child:             textarea,
 		Foreground:        renderer.ColorWhite,
 		ForegroundFocused: renderer.ColorGreen,
 	}
 
-	layout := ui.NewHStack(
-		&listBorder,
-		&textareaBorder,
-	)
+	layout := ui.NewHStack(listBorder, textareaBorder)
 
-	fm := ui.NewFocusManager()
-	fm.Add(list)
-	fm.Add(textarea)
+	a, err := app.New(&layout)
+	if err != nil {
+		panic(err)
+	}
 
-	w, h, _ := b.Size()
-
-	loop := events.NewEventLoop(b)
-	ch := loop.Start()
-
-	u.Draw(layout, 0, 0, w, h)
-	u.Render()
-
-	for e := range ch {
-		switch ev := e.(type) {
-		case events.KeyEvent:
-			if ev.Code == events.KeyCtrlC {
-				return
-			} else {
-				fm.HandleEvent(e)
-			}
-		case events.ResizeEvent:
-			w, h = ev.Width, ev.Height
-			u.Resize(w, h)
-		}
-
-		u.Draw(layout, 0, 0, w, h)
-		u.Render()
+	if err := a.Run(); err != nil {
+		panic(err)
 	}
 }

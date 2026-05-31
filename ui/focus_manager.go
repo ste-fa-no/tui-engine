@@ -1,6 +1,8 @@
 package ui
 
-import "tui-engine/events"
+import (
+	"tui-engine/actions"
+)
 
 type FocusManager struct {
 	widgets []Interactive
@@ -19,19 +21,34 @@ func (fm *FocusManager) Add(w Interactive) {
 	}
 }
 
-func (fm *FocusManager) HandleEvent(e events.Event) {
+func (fm *FocusManager) HandleAction(action actions.WidgetAction) bool {
+	if len(fm.widgets) == 0 {
+		return false
+	}
+	return fm.widgets[fm.current].HandleAction(action)
+}
+
+func (fm *FocusManager) HandleRune(r rune) bool {
+	if len(fm.widgets) == 0 {
+		return false
+	}
+	return fm.widgets[fm.current].HandleRune(r)
+}
+
+func (fm *FocusManager) FocusNext() {
 	if len(fm.widgets) == 0 {
 		return
 	}
-	
-	switch ev := e.(type) {
-	case events.KeyEvent:
-		if ev.Code == events.KeyTab {
-			fm.widgets[fm.current].SetFocused(false)
-			fm.current = (fm.current + 1) % len(fm.widgets)
-			fm.widgets[fm.current].SetFocused(true)
-		} else {
-			fm.widgets[fm.current].HandleEvent(ev)
-		}
+	fm.widgets[fm.current].SetFocused(false)
+	fm.current = (fm.current + 1) % len(fm.widgets)
+	fm.widgets[fm.current].SetFocused(true)
+}
+
+func (fm *FocusManager) FocusPrevious() {
+	if len(fm.widgets) == 0 {
+		return
 	}
+	fm.widgets[fm.current].SetFocused(false)
+	fm.current = (fm.current - 1 + len(fm.widgets)) % len(fm.widgets)
+	fm.widgets[fm.current].SetFocused(true)
 }

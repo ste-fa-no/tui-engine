@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"tui-engine/events"
+	"tui-engine/actions"
 	"tui-engine/renderer"
 )
 
@@ -26,85 +26,88 @@ func (ta *TextArea) GetConstraint() Constraint {
 	return ta.Constraint
 }
 
-func (ta *TextArea) HandleEvent(e events.Event) bool {
+func (ta *TextArea) HandleAction(action actions.WidgetAction) bool {
 	if len(ta.lines) == 0 {
 		ta.lines = []string{""}
 	}
 
-	switch ev := e.(type) {
-	case events.KeyEvent:
-		switch ev.Code {
-		case events.KeyRune:
-			line := []rune(ta.lines[ta.cursorRow])
-			line = append(line[:ta.cursorCol], append([]rune{ev.Rune}, line[ta.cursorCol:]...)...)
-			ta.lines[ta.cursorRow] = string(line)
-			ta.cursorCol++
-
-		case events.KeyEnter:
-			line := ta.lines[ta.cursorRow]
-			ta.lines[ta.cursorRow] = line[:ta.cursorCol]
-			newLine := line[ta.cursorCol:]
-			ta.lines = append(ta.lines[:ta.cursorRow+1],
-				append([]string{newLine}, ta.lines[ta.cursorRow+1:]...)...)
-			ta.cursorRow++
-			ta.cursorCol = 0
-
-		case events.KeyBackspace:
-			if ta.cursorCol > 0 {
-				line := []rune(ta.lines[ta.cursorRow])
-				line = append(line[:ta.cursorCol-1], line[ta.cursorCol:]...)
-				ta.lines[ta.cursorRow] = string(line)
-				ta.cursorCol--
-			} else if ta.cursorRow > 0 {
-				prevLine := ta.lines[ta.cursorRow-1]
-				currLine := ta.lines[ta.cursorRow]
-				ta.cursorCol = len([]rune(prevLine))
-				ta.lines[ta.cursorRow-1] = prevLine + currLine
-				ta.lines = append(ta.lines[:ta.cursorRow], ta.lines[ta.cursorRow+1:]...)
-				ta.cursorRow--
-			}
-
-		case events.KeyLeft:
-			if ta.cursorCol > 0 {
-				ta.cursorCol--
-			} else if ta.cursorRow > 0 {
-				ta.cursorRow--
-				ta.cursorCol = len([]rune(ta.lines[ta.cursorRow]))
-			}
-
-		case events.KeyRight:
-			if ta.cursorCol < len([]rune(ta.lines[ta.cursorRow])) {
-				ta.cursorCol++
-			} else if ta.cursorRow < len(ta.lines)-1 {
-				ta.cursorRow++
-				ta.cursorCol = 0
-			}
-
-		case events.KeyUp:
-			if ta.cursorRow > 0 {
-				ta.cursorRow--
-
-				lineLen := len([]rune(ta.lines[ta.cursorRow]))
-				if ta.cursorCol > lineLen {
-					ta.cursorCol = lineLen
-				}
-			}
-
-		case events.KeyDown:
-			if ta.cursorRow < len(ta.lines)-1 {
-				ta.cursorRow++
-
-				lineLen := len([]rune(ta.lines[ta.cursorRow]))
-				if ta.cursorCol > lineLen {
-					ta.cursorCol = lineLen
-				}
+	switch action {
+	case actions.CursorUp:
+		if ta.cursorRow > 0 {
+			ta.cursorRow--
+			lineLen := len([]rune(ta.lines[ta.cursorRow]))
+			if ta.cursorCol > lineLen {
+				ta.cursorCol = lineLen
 			}
 		}
 
-		return true
+	case actions.CursorDown:
+		if ta.cursorRow < len(ta.lines)-1 {
+			ta.cursorRow++
+			lineLen := len([]rune(ta.lines[ta.cursorRow]))
+			if ta.cursorCol > lineLen {
+				ta.cursorCol = lineLen
+			}
+		}
+
+	case actions.CursorLeft:
+		if ta.cursorCol > 0 {
+			ta.cursorCol--
+		} else if ta.cursorRow > 0 {
+			ta.cursorRow--
+			ta.cursorCol = len([]rune(ta.lines[ta.cursorRow]))
+		}
+
+	case actions.CursorRight:
+		if ta.cursorCol < len([]rune(ta.lines[ta.cursorRow])) {
+			ta.cursorCol++
+		} else if ta.cursorRow < len(ta.lines)-1 {
+			ta.cursorRow++
+			ta.cursorCol = 0
+		}
+
+	case actions.Confirm:
+		line := ta.lines[ta.cursorRow]
+		ta.lines[ta.cursorRow] = line[:ta.cursorCol]
+		newLine := line[ta.cursorCol:]
+		ta.lines = append(ta.lines[:ta.cursorRow+1],
+			append([]string{newLine}, ta.lines[ta.cursorRow+1:]...)...)
+		ta.cursorRow++
+		ta.cursorCol = 0
+
+	case actions.DeleteBack:
+		if ta.cursorCol > 0 {
+			line := []rune(ta.lines[ta.cursorRow])
+			line = append(line[:ta.cursorCol-1], line[ta.cursorCol:]...)
+			ta.lines[ta.cursorRow] = string(line)
+			ta.cursorCol--
+		} else if ta.cursorRow > 0 {
+			prevLine := ta.lines[ta.cursorRow-1]
+			currLine := ta.lines[ta.cursorRow]
+			ta.cursorCol = len([]rune(prevLine))
+			ta.lines[ta.cursorRow-1] = prevLine + currLine
+			ta.lines = append(ta.lines[:ta.cursorRow], ta.lines[ta.cursorRow+1:]...)
+			ta.cursorRow--
+		}
+
+	default:
+		return false
 	}
 
-	return false
+	return true
+}
+
+func (ta *TextArea) HandleRune(r rune) bool {
+	if len(ta.lines) == 0 {
+		ta.lines = []string{""}
+	}
+
+	line := []rune(ta.lines[ta.cursorRow])
+	line = append(line[:ta.cursorCol], append([]rune{r}, line[ta.cursorCol:]...)...)
+	ta.lines[ta.cursorRow] = string(line)
+	ta.cursorCol++
+
+	return true
 }
 
 func (ta *TextArea) Render(ctx Context, width, height int) {

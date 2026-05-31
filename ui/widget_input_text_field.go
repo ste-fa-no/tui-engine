@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"tui-engine/events"
+	"tui-engine/actions"
 	"tui-engine/renderer"
 )
 
@@ -22,36 +22,35 @@ func (tf *TextField) GetConstraint() Constraint {
 	return tf.Constraint
 }
 
-func (tf *TextField) HandleEvent(e events.Event) bool {
-	switch ev := e.(type) {
-	case events.KeyEvent:
-		switch ev.Code {
-		case events.KeyRune:
-			runes := []rune(tf.Value)
-			runes = append(runes[:tf.cursor], append([]rune{ev.Rune}, runes[tf.cursor:]...)...)
-			tf.Value = string(runes)
-			tf.cursor++
-		case events.KeyBackspace:
-			if tf.cursor > 0 {
-				runes := []rune(tf.Value)
-				runes = append(runes[:tf.cursor-1], runes[tf.cursor:]...)
-				tf.Value = string(runes)
-				tf.cursor--
-			}
-		case events.KeyLeft:
-			if tf.cursor > 0 {
-				tf.cursor--
-			}
-		case events.KeyRight:
-			if tf.cursor < len([]rune(tf.Value)) {
-				tf.cursor++
-			}
+func (tf *TextField) HandleAction(action actions.WidgetAction) bool {
+	switch action {
+	case actions.CursorLeft:
+		if tf.cursor > 0 {
+			tf.cursor--
 		}
-
-		return true
+	case actions.CursorRight:
+		if tf.cursor < len([]rune(tf.Value)) {
+			tf.cursor++
+		}
+	case actions.DeleteBack:
+		if tf.cursor > 0 {
+			runes := []rune(tf.Value)
+			runes = append(runes[:tf.cursor-1], runes[tf.cursor:]...)
+			tf.Value = string(runes)
+			tf.cursor--
+		}
+	default:
+		return false
 	}
+	return true
+}
 
-	return false
+func (tf *TextField) HandleRune(r rune) bool {
+	runes := []rune(tf.Value)
+	runes = append(runes[:tf.cursor], append([]rune{r}, runes[tf.cursor:]...)...)
+	tf.Value = string(runes)
+	tf.cursor++
+	return true
 }
 
 func (tf *TextField) Render(ctx Context, width, height int) {

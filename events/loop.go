@@ -19,5 +19,4 @@ func (l *EventLoop) Start() <-chan Event {
 	go watchResizeEvents(channel)
 
 	return channel
-
 }

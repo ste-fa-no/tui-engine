@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"tui-engine/events"
+	"tui-engine/actions"
 	"tui-engine/renderer"
 	"tui-engine/util"
 )
@@ -74,24 +74,25 @@ func (l *List) Render(ctx Context, width, height int) {
 	}
 }
 
-func (l *List) HandleEvent(e events.Event) bool {
-	switch ev := e.(type) {
-	case events.KeyEvent:
-		switch ev.Code {
-		case events.KeyUp:
-			if l.cursor > 0 {
-				l.cursor--
-			}
-		case events.KeyDown:
-			if l.cursor < len(l.Items)-1 {
-				l.cursor++
-			}
-		case events.KeyEnter:
-			l.Selection.Set(l.cursor)
+func (l *List) HandleAction(action actions.WidgetAction) bool {
+	switch action {
+	case actions.CursorUp:
+		if l.cursor > 0 {
+			l.cursor--
 		}
-		return true
+	case actions.CursorDown:
+		if l.cursor < len(l.Items)-1 {
+			l.cursor++
+		}
+	case actions.Confirm:
+		l.Selection.Set(l.cursor)
+	default:
+		return false
 	}
+	return false
+}
 
+func (l *List) HandleRune(r rune) bool {
 	return false
 }
 

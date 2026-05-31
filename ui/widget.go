@@ -1,7 +1,8 @@
 package ui
 
 import (
-	"tui-engine/events"
+	"tui-engine/actions"
+	_ "tui-engine/events"
 	"tui-engine/renderer"
 )
 
@@ -13,7 +14,8 @@ type Interactive interface {
 	Widget
 	IsFocused() bool
 	SetFocused(focused bool)
-	HandleEvent(event events.Event) bool
+	HandleAction(action actions.WidgetAction) bool
+	HandleRune(r rune) bool
 }
 
 type Input struct {
@@ -27,4 +29,9 @@ type Input struct {
 	focused               bool
 	cursor                int
 	offset                int
+}
+
+type Container interface {
+	Widget
+	Children() []Widget
 }

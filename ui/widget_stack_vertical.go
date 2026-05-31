@@ -1,18 +1,22 @@
 package ui
 
 type VStack struct {
-	Children []Widget
+	children []Widget
 }
 
 func NewVStack(children ...Widget) VStack {
-	return VStack{Children: children}
+	return VStack{children: children}
 }
 
-func (h VStack) Render(ctx Context, width, height int) {
-	sizes := resolveConstraints(h.Children, height)
+func (v VStack) Render(ctx Context, width, height int) {
+	sizes := resolveConstraints(v.children, height)
 	start := 0
-	for i, child := range h.Children {
+	for i, child := range v.children {
 		child.Render(ctx.SubContext(0, start), width, sizes[i])
 		start += sizes[i]
 	}
+}
+
+func (v VStack) Children() []Widget {
+	return v.children
 }

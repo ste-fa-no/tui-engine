@@ -46,3 +46,7 @@ func (b Border) Render(ctx Context, width, height int) {
 
 	b.Child.Render(ctx.SubContext(1, 1), width-2, height-2)
 }
+
+func (b Border) Children() []Widget {
+	return []Widget{b.Child}
+}

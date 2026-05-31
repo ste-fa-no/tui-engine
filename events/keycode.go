@@ -10,9 +10,11 @@ const (
 	KeyRight
 	KeyEnter
 	KeyBackspace
+	KeyDelete
 	KeyCtrlC
 	KeyCtrlD
 	KeyTab
+	KeyShiftTab
 	KeyEscape
 )
 
@@ -24,9 +26,11 @@ var keyCodeNames = map[KeyCode]string{
 	KeyRight:     "RIGHT",
 	KeyEnter:     "ENTER",
 	KeyBackspace: "BACKSPACE",
+	KeyDelete:    "DELETE",
 	KeyCtrlC:     "CTRL-C",
 	KeyCtrlD:     "CTRL-D",
 	KeyTab:       "TAB",
+	KeyShiftTab:  "SHIFT-TAB",
 	KeyEscape:    "ESC",
 }
 
