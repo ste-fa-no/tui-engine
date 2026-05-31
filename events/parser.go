@@ -28,6 +28,12 @@ func parse(buf []byte) (Event, int) {
 				keyCode = KeyRight
 			case 'D':
 				keyCode = KeyLeft
+			case 'Z':
+				keyCode = KeyShiftTab
+			case '3':
+				if len(buf) >= 4 && buf[3] == '~' {
+					return KeyEvent{Code: KeyDelete}, 4
+				}
 			}
 			return KeyEvent{Code: keyCode}, 3
 		}
